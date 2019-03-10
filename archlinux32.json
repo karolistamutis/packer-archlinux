@@ -1,0 +1,48 @@
+{
+  "builders": [{
+    "type": "virtualbox-iso",
+    "guest_os_type": "ArchLinux",
+    "iso_url": "http://mirror.archlinux32.org/archisos/archlinux-2019.03.07-i686.iso",
+    "iso_checksum_type": "sha512",
+    "iso_checksum": "71ac0a360da98be6281f5e800b90c048e35fd1d176ced1babf64a63a03bd5c602829e3b92ec21a8030b54648086303f151ae74668093edd6fdf1c2a3e130085a",
+    "output_directory": "output-archlinux32",
+    "vm_name": "packer-archlinux32",
+    "disk_size": "{{user `disk_size`}}",
+    "headless": "true",
+    "http_directory": "preseed",
+    "boot_wait": "10s",
+    "boot_command": [
+      "<enter><wait10><wait10><wait10><wait10>",
+      "curl -O 'http://{{.HTTPIP}}:{{.HTTPPort}}/install{,-chroot}.sh'<enter><wait>",
+      "bash install.sh < install-chroot.sh && systemctl reboot<enter>"
+    ],
+    "ssh_timeout": "30m",
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "shutdown_command": "sudo systemctl poweroff",
+    "guest_additions_mode": "disable",
+    "shutdown_command": "sudo systemctl poweroff",
+    "vboxmanage": [
+      ["modifyvm", "{{.Name}}", "--memory", "{{user `memory`}}"]
+    ]
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "scripts": [
+      "scripts/virtualbox.sh",
+      "scripts/python.sh",
+      "scripts/vagrant.sh",
+      "scripts/sshd.sh",
+      "scripts/cleanup.sh",
+      "scripts/minimize.sh"
+    ]
+  }],
+  "post-processors": [{
+    "type": "vagrant",
+    "output": "archlinux32.box"
+  }],
+  "variables": {
+    "disk_size": "10000",
+    "memory": "1024"
+  }
+}
